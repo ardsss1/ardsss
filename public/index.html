@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Senkron Video</title>
+</head>
+<body>
+  <h2>Fatih Terim Videosu (Senkronize)</h2>
+  <video id="myVideo" controls width="640" height="360">
+    <source src="Sergen Yalçın Biz Yaşayamadık Da.mp4" type="video/mp4">
+    Tarayıcınız video etiketini desteklemiyor.
+  </video>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const video = document.getElementById("myVideo");
+
+    let isRemoteChange = false;
+
+    video.addEventListener("play", () => {
+      if (!isRemoteChange) {
+        socket.emit("video-action", { action: "play", time: video.currentTime });
+      }
+    });
+
+    video.addEventListener("pause", () => {
+      if (!isRemoteChange) {
+        socket.emit("video-action", { action: "pause", time: video.currentTime });
+      }
+    });
+
+    socket.on("video-action", (data) => {
+      isRemoteChange = true;
+      video.currentTime = data.time;
+
+      if (data.action === "play") {
+        video.play();
+      } else if (data.action === "pause") {
+        video.pause();
+      }
+
+      setTimeout(() => isRemoteChange = false, 500);
+    });
+  </script>
+</body>
+</html>
